@@ -73,7 +73,7 @@ jobs:
           pip install delvewheel
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.4.1
+        uses: pypa/cibuildwheel@v4.1.0
         env:
           CIBW_BUILD: ${{ matrix.python }}-${{ matrix.buildplat[1] == 'manylinux2014_x86_64' && 'manylinux_x86_64' || matrix.buildplat[1] }}
           CIBW_SKIP: "*-win32 *-musllinux*"
