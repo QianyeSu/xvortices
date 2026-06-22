@@ -1,0 +1,49 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+    "numpy>=1.24.0",
+    "meson",
+    "ninja",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xvortices"
+dynamic = ["version", "dependencies"]
+description = "Viewing vortices in a translating cylindrical coordinate"
+readme = "README.md"
+authors = [{ name = "Qianye Su", email = "suqianye2000@gmail.com" }]
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+keywords = ["vortex", "vortices", "xarray", "dask", "numpy", "typhoon"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://github.com/QianyeSu/xvortices"
+Repository = "https://github.com/QianyeSu/xvortices"
+
+[tool.setuptools]
+packages = ["xvortices"]
+
+[tool.setuptools.dynamic]
+version = { attr = "xvortices.__version__" }
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
