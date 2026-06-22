@@ -1,8 +1,6 @@
 # xvortices
 
-[![DOI](https://zenodo.org/badge/426860265.svg)](https://zenodo.org/badge/latestdoi/426860265)
 ![GitHub](https://img.shields.io/github/license/QianyeSu/xvortices)
-[![Documentation Status](https://readthedocs.org/projects/xvortices/badge/?version=latest)](https://xvortices.readthedocs.io/en/latest/?badge=latest)
 
 ![cylindrical coordinate moving on earth](./pics/cylind.jpg)
 
