@@ -2,7 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/QianyeSu/xvortices)
 
-![cylindrical coordinate moving on earth](./pics/cylind.jpg)
+![cylindrical coordinate moving on earth](https://raw.githubusercontent.com/QianyeSu/xvortices/main/pics/cylind.jpg)
 
 ## 1. Introduction
 `xvortices` is a python package built on [`xarray`](http://xarray.pydata.org/en/stable/) (starts with an `x`), targeting at extracting information about moving vortices from lat/lon gridded datasets.  Moving vortices include [tornado](https://en.wikipedia.org/wiki/Tornado), [tropical cyclone](https://en.wikipedia.org/wiki/Tropical_cyclone), [extratropical cyclone](https://en.wikipedia.org/wiki/Extratropical_cyclone), [polar vortex](https://en.wikipedia.org/wiki/Polar_vortex) in the atmospheric context, as well as [mesoscale eddy](https://en.wikipedia.org/wiki/Eddy_(fluid_dynamics)) and [ocean gyre](https://en.wikipedia.org/wiki/Ocean_gyre) in the oceanic context.  These moving vortices are usually described in a moving (also known as quasi-Lagrangian) cylindrical coordinate.  As the coordinate system moves on the spherical earth as a whole, one could take a view of the vortex dynamics from a quasi-Lagrangian perspective instead of the traditional Eulerian perspective.
@@ -15,7 +15,7 @@ Basically, this package would do the following jobs:
 
 With this tool, one can perform quasi-Lagrangian diagnoses of the structure, evolution, budget, intensity etc in a perspective different from the Eulerian one.
 
-![Lagrangian-view of TC](./pics/LagrangianView.gif)
+![Lagrangian-view of TC](https://raw.githubusercontent.com/QianyeSu/xvortices/main/pics/LagrangianView.gif)
 
 ---
 
@@ -60,7 +60,7 @@ vrel = v - vorel # storm-relative v
 uaz, vra = project_to_cylind(urel, vrel, etas)
 ```
 
-![TC example](./pics/TC.png)
+![TC example](https://raw.githubusercontent.com/QianyeSu/xvortices/main/pics/TC.png)
 
 Plotting its 3D structure is also easy:
 ```python
@@ -70,7 +70,7 @@ from xvortices import plot3D
 plot3D(lons[0], lats[0], uaz[0])
 ```
 
-![3D cylind](./docs/source/_static/3DCylind.png)
+![3D cylind](https://raw.githubusercontent.com/QianyeSu/xvortices/main/docs/source/_static/3DCylind.png)
 
 More details can be found at this [TC notebook](./notebooks/1.TCExample.ipynb).
 
@@ -113,6 +113,6 @@ v_r = vgos - vo
 uaz, vra = project_to_cylind(u_r, v_r, etas)
 ```
 
-![eddy plot](./pics/eddy.png)
+![eddy plot](https://raw.githubusercontent.com/QianyeSu/xvortices/main/pics/eddy.png)
 
 More details can be found at this [notebook](./notebooks/2.EddyExample.ipynb).
