@@ -24,9 +24,9 @@ copyright = f'{datetime.datetime.today().year}, Qianye Su'
 author = 'Qianye Su'
 
 # The short X.Y version
-version = '0.2'
+version = '0.1'
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '0.1.0'
 
 
 # -- General configuration ---------------------------------------------------
