@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
-Created on 2022.06.16
+Created on 2026.06.16
 
 @author: Qianye Su
-Copyright 2018. All rights reserved. Use is subject to license terms.
+Copyright (c) 2026 Qianye Su. Released under the MIT License.
 '''
 import cartopy.crs as ccrs
 import cartopy.feature
@@ -25,6 +25,8 @@ _deg2m = np.pi / 180.0
 '''
 Here defines some util functions for this package
 '''
+
+
 def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
            reverseZ=False, lonR=8, latR=5, fontsize=18, reso='50m',
            figsize=(13, 8), cmap='jet', vmin=None, vmax=None, alpha=0.7):
@@ -67,11 +69,11 @@ def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
     """
     dims = da.dims
 
-    azishift = len(da[dims[-1]]) // 4 # rotate a quarter from north to east
+    azishift = len(da[dims[-1]]) // 4  # rotate a quarter from north to east
 
-    var  = da  .roll({dims[-1]: azishift}).pad({dims[-1]: (0,1)}, 'wrap')
-    lon  = lons.roll({dims[-1]: azishift}).pad({dims[-1]: (0,1)}, 'wrap')
-    lat  = lats.roll({dims[-1]: azishift}).pad({dims[-1]: (0,1)}, 'wrap')
+    var = da  .roll({dims[-1]: azishift}).pad({dims[-1]: (0, 1)}, 'wrap')
+    lon = lons.roll({dims[-1]: azishift}).pad({dims[-1]: (0, 1)}, 'wrap')
+    lat = lats.roll({dims[-1]: azishift}).pad({dims[-1]: (0, 1)}, 'wrap')
 
     if len(dims) != 3:
         raise Exception('only 3D spatial data can be plotted')
@@ -90,13 +92,14 @@ def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
         zrange = zrange[::-1]
 
     if title == None:
-        title = '3D structure' + ('' if var.name == None else ' of ' + var.name)
+        title = '3D structure' + \
+            ('' if var.name == None else ' of ' + var.name)
 
     # combine the color components
     vmin = var.min().values if vmin == None else vmin
     vmax = var.max().values if vmax == None else vmax
 
-    norm   = colors.Normalize(vmin=vmin, vmax=vmax, clip=False)
+    norm = colors.Normalize(vmin=vmin, vmax=vmax, clip=False)
     mapper = cm.ScalarMappable(norm=norm, cmap=cmap)
     fcolor = mapper.to_rgba(var.values.ravel()).reshape(var.shape+(4,))
     fcolor = fcolor[:-1, :-1, :-1, :]
@@ -116,7 +119,7 @@ def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
     ax3d.set_title(title, fontsize=fontsize)
     ax3d.view_init(elevangle, azimngle)
     ax3d.set_xlabel('longitude', fontsize=fontsize-2)
-    ax3d.set_ylabel('latitude' , fontsize=fontsize-2)
+    ax3d.set_ylabel('latitude', fontsize=fontsize-2)
     ax3d.set_zlabel(var[dims[0]].name, fontsize=fontsize-2)
 
     ############## get the extent as a shapely geometry and clip ##############
@@ -127,13 +130,13 @@ def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
     plt.close(ax2d.figure)
 
     LAND = NaturalEarthFeature('physical', 'land', reso, edgecolor='face',
-                facecolor=np.array((240, 240, 220)) / 256., zorder=-1)
+                               facecolor=np.array((240, 240, 220)) / 256., zorder=-1)
 
     OCEAN = NaturalEarthFeature('physical', 'ocean', reso, edgecolor='face',
-                facecolor=np.array((152, 183, 226)) / 256., zorder=-1)
+                                facecolor=np.array((152, 183, 226)) / 256., zorder=-1)
 
     add_feature3d(ax3d, OCEAN, clip_geom, zs=zrange[0])
-    add_feature3d(ax3d, LAND , clip_geom, zs=zrange[0])
+    add_feature3d(ax3d, LAND, clip_geom, zs=zrange[0])
     # add_feature3d(ax3d, cartopy.feature.COASTLINE, zs=zrange[0])
 
     plt.show()
@@ -145,6 +148,8 @@ Below are the private helper methods
 Some code snippet from:
 https://stackoverflow.com/questions/23785408/3d-cartopy-similar-to-matplotlib-basemap
 """
+
+
 def add_feature3d(ax3d, feature, clip_geom=None, zs=None):
     """Add cartopy feature to a given 3D axes
 
@@ -159,7 +164,7 @@ def add_feature3d(ax3d, feature, clip_geom=None, zs=None):
     zs: float
         Which z level to add the feature
     """
-    concat = lambda iterable: list(itertools.chain.from_iterable(iterable))
+    def concat(iterable): return list(itertools.chain.from_iterable(iterable))
 
     target_projection = ccrs.PlateCarree()
     geoms = list(feature.geometries())
@@ -173,7 +178,8 @@ def add_feature3d(ax3d, feature, clip_geom=None, zs=None):
     if clip_geom:
         # Clip the geometries based on the extent of the map
         # (because mpl3d can't do it for us)
-        geoms = [geom.intersection(clip_geom) for geom in geoms if geom.is_valid]
+        geoms = [geom.intersection(clip_geom)
+                 for geom in geoms if geom.is_valid]
 
     # Convert the geometries to paths so we can use them in matplotlib.
     paths = concat(geos_to_path(geom) for geom in geoms if geom.is_valid)
