@@ -62,6 +62,48 @@ def test_load_cylind_preserves_xarray_dims_and_values():
     np.testing.assert_allclose(out.values, lons.values + lats.values, atol=1e-10)
 
 
+def test_load_cylind_matches_xarray_with_missing_values():
+    lat = np.linspace(0, 4, 5)
+    lon = np.linspace(100, 104, 5)
+    values = np.add.outer(lat, lon)
+    values[2, 2] = np.nan
+    data = xr.DataArray(
+        values,
+        dims=("lat", "lon"),
+        coords={"lat": lat, "lon": lon},
+        name="z",
+    )
+    azim_num, radi_num, rad_max = 8, 3, 1
+    azim_values = np.linspace(0, 360 - 360 / azim_num, azim_num)
+    radi_values = np.linspace(0, rad_max, radi_num)
+    azim = xr.DataArray(azim_values, dims="azim", coords={"azim": azim_values})
+    radi = xr.DataArray(radi_values, dims="radi", coords={"radi": radi_values})
+
+    olon = 102.0
+    olat = 2.0
+    olon_r = np.deg2rad(olon)
+    olat_r = np.deg2rad(olat)
+    azim_r = np.deg2rad(azim)
+    radi_r = np.deg2rad(radi)
+    lats_r = np.arcsin(
+        np.sin(olat_r) * np.cos(radi_r)
+        + np.cos(olat_r) * np.sin(radi_r) * np.cos(azim_r)
+    )
+    dlam_r = np.arcsin(np.sin(radi_r) * np.sin(azim_r)) / np.cos(lats_r)
+    lons = np.rad2deg(olon_r - dlam_r)
+    lats = np.rad2deg(lats_r)
+    expected = data.interp(coords={"lon": lons, "lat": lats}).drop_vars(
+        ["lat", "lon"], errors="ignore"
+    )
+
+    actual = load_cylind(
+        data, olon=olon, olat=olat, azimNum=azim_num, radiNum=radi_num, radMax=rad_max
+    )[0]
+
+    np.testing.assert_allclose(actual, expected, rtol=1e-10, atol=1e-10, equal_nan=True)
+    assert np.isnan(actual.sel(radi=0.0)).all()
+
+
 def test_project_to_cylind_matches_reference():
     radi = np.linspace(0, 2, 5)
     azim = np.linspace(0, 315, 8)

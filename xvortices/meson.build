@@ -61,18 +61,17 @@ elif host_system != 'windows'
 endif
 
 fortran_args = [
-  '-Ofast',
+  '-O3',
   '-fPIC',
   '-funroll-loops',
   '-finline-functions',
   '-ftree-vectorize',
-  '-ffinite-math-only',
   '-fno-math-errno',
   '-ffree-line-length-none',
 ]
 c_args = [
   '-DNPY_NO_DEPRECATED_API=NPY_1_19_API_VERSION',
-  '-Ofast',
+  '-O3',
   '-fno-math-errno',
 ]
 
