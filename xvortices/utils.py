@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 '''
 Created on 2026.06.16
 
 @author: Qianye Su
 Copyright (c) 2026 Qianye Su. Released under the MIT License.
 '''
+from typing import Any, Optional, Tuple
+
 import cartopy.crs as ccrs
 import cartopy.feature
 import itertools
@@ -27,9 +31,24 @@ Here defines some util functions for this package
 '''
 
 
-def plot3D(lons, lats, da, azimngle=-60, elevangle=30, title=None,
-           reverseZ=False, lonR=8, latR=5, fontsize=18, reso='50m',
-           figsize=(13, 8), cmap='jet', vmin=None, vmax=None, alpha=0.7):
+def plot3D(
+    lons: xr.DataArray,
+    lats: xr.DataArray,
+    da: xr.DataArray,
+    azimngle: float = -60,
+    elevangle: float = 30,
+    title: Optional[str] = None,
+    reverseZ: bool = False,
+    lonR: float = 8,
+    latR: float = 5,
+    fontsize: int = 18,
+    reso: str = '50m',
+    figsize: Tuple[float, float] = (13, 8),
+    cmap: str = 'jet',
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
+    alpha: float = 0.7,
+) -> None:
     """Plot 3D structure of a variable
 
     Parameters
@@ -150,7 +169,12 @@ https://stackoverflow.com/questions/23785408/3d-cartopy-similar-to-matplotlib-ba
 """
 
 
-def add_feature3d(ax3d, feature, clip_geom=None, zs=None):
+def add_feature3d(
+    ax3d: Any,
+    feature: Any,
+    clip_geom: Optional[Any] = None,
+    zs: Optional[float] = None,
+) -> None:
     """Add cartopy feature to a given 3D axes
 
     Parameters

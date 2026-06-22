@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
+from typing import List, Optional, Sequence, Tuple, Union, overload
+
 import numpy as np
 import xarray as xr
 
-from . import _backend
+from . import _core
+
+CenterValue = Union[float, int, Sequence[float], np.ndarray, xr.DataArray]
+FieldInput = Union[xr.DataArray, xr.Dataset, Sequence[xr.DataArray]]
+FieldOutput = Union[xr.DataArray, List[xr.DataArray]]
 
 
-def _as_center_dataarray(value, name):
+def _as_center_dataarray(value: CenterValue, name: str) -> xr.DataArray:
     if isinstance(value, xr.DataArray):
         return value.astype(np.float64)
 
@@ -16,11 +24,11 @@ def _as_center_dataarray(value, name):
     return xr.DataArray(arr, dims=(name,), coords={name: np.arange(arr.size)})
 
 
-def _drop_interp_coords(obj, lonname, latname):
+def _drop_interp_coords(obj: xr.DataArray, lonname: str, latname: str) -> xr.DataArray:
     return obj.drop_vars([latname, lonname], errors="ignore")
 
 
-def _regular_spacing(coord):
+def _regular_spacing(coord: xr.DataArray) -> Optional[Tuple[float, float]]:
     values = np.asarray(coord.values, dtype=np.float64)
     if values.ndim != 1 or values.size < 2:
         return None
@@ -31,7 +39,13 @@ def _regular_spacing(coord):
     return values[0], step
 
 
-def _interp_regular_dataarray(da, lons, lats, lonname, latname):
+def _interp_regular_dataarray(
+    da: xr.DataArray,
+    lons: xr.DataArray,
+    lats: xr.DataArray,
+    lonname: str,
+    latname: str,
+) -> Optional[xr.DataArray]:
     if lonname not in da.coords or latname not in da.coords:
         return None
     if da.coords[lonname].dims != (lonname,) or da.coords[latname].dims != (latname,):
@@ -73,7 +87,7 @@ def _interp_regular_dataarray(da, lons, lats, lonname, latname):
     else:
         center_map = np.zeros(nouter, dtype=np.int32)
 
-    out = _backend.interp_regular(
+    out = _core.interp_regular(
         data,
         float(lon_spacing[0]),
         float(lon_spacing[1]),
@@ -96,14 +110,25 @@ def _interp_regular_dataarray(da, lons, lats, lonname, latname):
     return xr.DataArray(out.reshape(out_shape), dims=out_dims, coords=out_coords, name=da.name, attrs=da.attrs)
 
 
-def _interp_dataarray(da, lons, lats, lonname, latname):
+def _interp_dataarray(
+    da: xr.DataArray,
+    lons: xr.DataArray,
+    lats: xr.DataArray,
+    lonname: str,
+    latname: str,
+) -> xr.DataArray:
     out = _interp_regular_dataarray(da, lons, lats, lonname, latname)
     if out is not None:
         return out
     return _drop_interp_coords(da.interp(coords={lonname: lons, latname: lats}), lonname, latname)
 
 
-def _compute_cylind_coords(olon, olat, azim, radi):
+def _compute_cylind_coords(
+    olon: CenterValue,
+    olat: CenterValue,
+    azim: xr.DataArray,
+    radi: xr.DataArray,
+) -> Tuple[xr.DataArray, xr.DataArray, xr.DataArray]:
     olon_da, olat_da = xr.broadcast(
         _as_center_dataarray(olon, "center"),
         _as_center_dataarray(olat, "center"),
@@ -116,7 +141,7 @@ def _compute_cylind_coords(olon, olat, azim, radi):
         if dim in olon_da.coords
     }
 
-    lons, lats, etas = _backend.cylind_coords(
+    lons, lats, etas = _core.cylind_coords(
         np.ascontiguousarray(olon_da.values.reshape(-1), dtype=np.float64),
         np.ascontiguousarray(olat_da.values.reshape(-1), dtype=np.float64),
         np.ascontiguousarray(azim.values, dtype=np.float64),
@@ -148,8 +173,44 @@ def _compute_cylind_coords(olon, olat, azim, radi):
     )
 
 
-def load_cylind(ds, olon, olat, azimNum=36, radiNum=11, radMax=10,
-                lonname='lon', latname='lat'):
+@overload
+def load_cylind(
+    ds: xr.DataArray,
+    olon: CenterValue,
+    olat: CenterValue,
+    azimNum: int = 36,
+    radiNum: int = 11,
+    radMax: float = 10,
+    lonname: str = "lon",
+    latname: str = "lat",
+) -> Tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
+    ...
+
+
+@overload
+def load_cylind(
+    ds: Union[xr.Dataset, Sequence[xr.DataArray]],
+    olon: CenterValue,
+    olat: CenterValue,
+    azimNum: int = 36,
+    radiNum: int = 11,
+    radMax: float = 10,
+    lonname: str = "lon",
+    latname: str = "lat",
+) -> Tuple[List[xr.DataArray], xr.DataArray, xr.DataArray, xr.DataArray]:
+    ...
+
+
+def load_cylind(
+    ds: FieldInput,
+    olon: CenterValue,
+    olat: CenterValue,
+    azimNum: int = 36,
+    radiNum: int = 11,
+    radMax: float = 10,
+    lonname: str = "lon",
+    latname: str = "lat",
+) -> Tuple[FieldOutput, xr.DataArray, xr.DataArray, xr.DataArray]:
     """Load binary data
 
     Load scalar data from a lat/lon grid to a cylindrical grid translating
@@ -208,7 +269,11 @@ def load_cylind(ds, olon, olat, azimNum=36, radiNum=11, radMax=10,
     return vs_interp, lons, lats, etas_r
 
 
-def project_to_cylind(u, v, etas):
+def project_to_cylind(
+    u: xr.DataArray,
+    v: xr.DataArray,
+    etas: xr.DataArray,
+) -> Tuple[xr.DataArray, xr.DataArray]:
     """Re-project a vector
 
     Re-project zonal/meridional (u/v) velocity components onto
@@ -231,7 +296,7 @@ def project_to_cylind(u, v, etas):
         radial component of velocity
     """
     u_b, v_b, etas_b = xr.broadcast(u, v, etas)
-    uaz, vra = _backend.project(
+    uaz, vra = _core.project(
         np.ascontiguousarray(u_b.values, dtype=np.float64),
         np.ascontiguousarray(v_b.values, dtype=np.float64),
         np.ascontiguousarray(etas_b.values, dtype=np.float64),
@@ -242,7 +307,12 @@ def project_to_cylind(u, v, etas):
     return uaz.rename('ut'), vra.rename('vr')
 
 
-def storm_relative(uc, vc, uaz, vra):
+def storm_relative(
+    uc: xr.DataArray,
+    vc: xr.DataArray,
+    uaz: xr.DataArray,
+    vra: xr.DataArray,
+) -> Tuple[xr.DataArray, xr.DataArray]:
     """Removing storm motion
 
     Calculate storm-relative velocity given the translating
@@ -271,7 +341,7 @@ def storm_relative(uc, vc, uaz, vra):
 
     azim = xr.DataArray(uaz["azim"].values, dims=("azim",), coords={"azim": uaz["azim"].values})
     uc_b, vc_b, uaz_b, vra_b, azim_b = xr.broadcast(uc, vc, uaz, vra, azim)
-    uaz_rel, vra_rel = _backend.storm_relative(
+    uaz_rel, vra_rel = _core.storm_relative(
         np.ascontiguousarray(uc_b.values, dtype=np.float64),
         np.ascontiguousarray(vc_b.values, dtype=np.float64),
         np.ascontiguousarray(azim_b.values, dtype=np.float64),

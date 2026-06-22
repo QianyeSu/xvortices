@@ -90,8 +90,8 @@ inc_np = include_directories(incdir_numpy)
 dependencies = [py_dep] + openmp_dependencies
 
 py.extension_module(
-  '_backend',
-  ['_backend_module.c', 'src/core.f90'],
+  '_core',
+  ['_core_module.c', 'src/core.f90'],
   include_directories: inc_np,
   dependencies: dependencies,
   fortran_args: fortran_args,

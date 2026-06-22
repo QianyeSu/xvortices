@@ -318,7 +318,7 @@ fail:
     return NULL;
 }
 
-static PyMethodDef backend_methods[] = {
+static PyMethodDef core_methods[] = {
     {"cylind_coords", py_cylind_coords, METH_VARARGS, "Compute cylindrical sampling longitude, latitude, and eta arrays."},
     {"project", py_project, METH_VARARGS, "Project zonal/meridional vectors to azimuthal/radial vectors."},
     {"storm_relative", py_storm_relative, METH_VARARGS, "Remove storm translation from cylindrical vector components."},
@@ -326,16 +326,16 @@ static PyMethodDef backend_methods[] = {
     {NULL, NULL, 0, NULL},
 };
 
-static struct PyModuleDef backend_module = {
+static struct PyModuleDef core_module = {
     PyModuleDef_HEAD_INIT,
-    "_backend",
-    "Fortran backend for xvortices.",
+    "_core",
+    "Fortran core for xvortices.",
     -1,
-    backend_methods,
+    core_methods,
 };
 
-PyMODINIT_FUNC PyInit__backend(void) {
-    PyObject *module = PyModule_Create(&backend_module);
+PyMODINIT_FUNC PyInit__core(void) {
+    PyObject *module = PyModule_Create(&core_module);
     if (module == NULL) {
         return NULL;
     }

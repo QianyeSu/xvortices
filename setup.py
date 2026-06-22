@@ -8,12 +8,13 @@ import re
 
 import codecs
 from os import path
+from typing import List, Optional
 
 from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 
 
-def _tool_from_active_env(name):
+def _tool_from_active_env(name: str) -> Optional[str]:
     prefixes = [Path(sys.prefix), Path(sys.base_prefix)]
     candidates = []
     for active in prefixes:
@@ -31,7 +32,7 @@ def _tool_from_active_env(name):
     return shutil.which(name)
 
 
-def _configure_compilers():
+def _configure_compilers() -> None:
     if os.environ.get("SKIP_FORTRAN") == "1":
         return
     defaults = {
@@ -49,18 +50,18 @@ class MesonBuildExt(build_ext):
     """Build the C/Fortran extension through Meson before setuptools staging."""
 
     @staticmethod
-    def _meson_command(*args):
+    def _meson_command(*args: str) -> List[str]:
         return [sys.executable, "-m", "mesonbuild.mesonmain", *args]
 
     @staticmethod
-    def _ninja_command(*args):
+    def _ninja_command(*args: str) -> List[str]:
         ninja = shutil.which("ninja")
         if ninja:
             return [ninja, *args]
         return [sys.executable, "-m", "ninja", *args]
 
     @staticmethod
-    def _write_native_file(module_dir):
+    def _write_native_file(module_dir: Path) -> Path:
         native_file = module_dir / "meson-python-native.ini"
         python_executable = Path(os.path.abspath(sys.executable)).as_posix()
         native_file.write_text(
@@ -71,18 +72,19 @@ class MesonBuildExt(build_ext):
         )
         return native_file
 
-    def run(self):
+    def run(self) -> None:
         if os.environ.get("SKIP_FORTRAN") != "1":
             _configure_compilers()
-            built = self._build_backend()
+            built = self._build_core()
             for ext in self.extensions:
                 target = Path(self.get_ext_fullpath(ext.name)).resolve()
                 target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(built, target)
+                if built.resolve() != target:
+                    shutil.copy2(built, target)
         else:
             super().run()
 
-    def _build_backend(self):
+    def _build_core(self) -> Path:
         module_dir = Path("xvortices").resolve()
         build_dir = module_dir / "build"
         if build_dir.exists():
@@ -114,17 +116,23 @@ class MesonBuildExt(build_ext):
         built = [
             path
             for path in build_dir.iterdir()
-            if path.name.startswith("_backend") and path.suffix in suffixes
+            if path.name.startswith("_core") and path.suffix in suffixes
         ]
         if not built:
             built = [
                 path
-                for path in build_dir.rglob("_backend*")
+                for path in build_dir.rglob("_core*")
                 if path.suffix in suffixes
             ]
         if not built:
-            raise RuntimeError("Meson completed but did not produce xvortices._backend")
+            raise RuntimeError("Meson completed but did not produce xvortices._core")
 
+        for stale in module_dir.glob("_core*.pyd"):
+            stale.unlink()
+        for stale in module_dir.glob("_core*.so"):
+            stale.unlink()
+        for stale in module_dir.glob("_core*.dylib"):
+            stale.unlink()
         for stale in module_dir.glob("_backend*.pyd"):
             stale.unlink()
         for stale in module_dir.glob("_backend*.so"):
@@ -178,12 +186,14 @@ setup(
     keywords='vortex vortices xarray dask numpy',
 
     packages=find_packages(exclude=['docs', 'tests', "notebooks", "pics"]),
+    include_package_data=False,
+    package_data={"xvortices": ["py.typed"]},
 
     install_requires=[
         "numpy",
         "xarray",
         "dask",
     ],
-    ext_modules=[Extension("xvortices._backend", sources=[])],
+    ext_modules=[Extension("xvortices._core", sources=[])],
     cmdclass={"build_ext": MesonBuildExt},
 )

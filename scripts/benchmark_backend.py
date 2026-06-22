@@ -1,6 +1,7 @@
 import time
 import sys
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import xarray as xr
@@ -10,7 +11,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from xvortices import load_cylind
 
 
-def old_xarray_load_cylind(da, olon, olat, azim_num, radi_num, rad_max):
+CenterValue = Union[float, xr.DataArray]
+
+
+def old_xarray_load_cylind(
+    da: xr.DataArray,
+    olon: CenterValue,
+    olat: CenterValue,
+    azim_num: int,
+    radi_num: int,
+    rad_max: float,
+) -> xr.DataArray:
     azim_values = np.linspace(0, 360 - 360 / azim_num, azim_num)
     radi_values = np.linspace(0, rad_max, radi_num)
     azim = xr.DataArray(azim_values, dims="azim", coords={"azim": azim_values})
@@ -32,7 +43,7 @@ def old_xarray_load_cylind(da, olon, olat, azim_num, radi_num, rad_max):
     )
 
 
-def main():
+def main() -> None:
     lat = np.linspace(0, 50, 401)
     lon = np.linspace(80, 160, 641)
     times = np.arange(48)

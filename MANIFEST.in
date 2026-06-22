@@ -3,7 +3,7 @@ include README.md
 include pyproject.toml
 include setup.py
 include requirements.txt
-recursive-include xvortices *.py *.c *.f90 meson.build
+recursive-include xvortices *.py *.typed *.c *.f90 meson.build
 recursive-include tests *.py
 recursive-include scripts *.py
 recursive-include notebooks *.ipynb

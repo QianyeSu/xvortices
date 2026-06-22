@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+from typing import Any
 
 import numpy as np
 import xarray as xr
@@ -9,13 +10,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from xvortices import load_cylind, project_to_cylind, storm_relative
 
 
-def _decode(value):
+def _decode(value: Any) -> str:
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="ignore").strip()
     return str(value).strip()
 
 
-def main():
+def main() -> None:
     root = Path(__file__).resolve().parents[1]
     ibtracs_path = Path(r"L:\TC_Energy\IBTrACS.ALL.v04r01.nc")
     grid_path = root / "Data" / "Haima2004.nc"

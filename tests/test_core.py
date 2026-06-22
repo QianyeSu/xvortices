@@ -5,7 +5,7 @@ import pytest
 import xarray as xr
 
 from xvortices import load_cylind, project_to_cylind, storm_relative
-from xvortices import _backend
+from xvortices import _core
 
 
 def reference_cylind_coords(olon, olat, azim, radi):
@@ -28,13 +28,13 @@ def reference_cylind_coords(olon, olat, azim, radi):
     return np.rad2deg(lons_r), np.rad2deg(lats_r), etas_r
 
 
-def test_backend_cylind_coords_matches_reference():
+def test_core_cylind_coords_matches_reference():
     olon = np.array([120.0, 121.5, 125.0])
     olat = np.array([18.0, 20.5, 24.0])
     azim = np.linspace(0, 355, 72)
     radi = np.linspace(0, 6, 31)
 
-    actual = _backend.cylind_coords(olon, olat, azim, radi)
+    actual = _core.cylind_coords(olon, olat, azim, radi)
     expected = reference_cylind_coords(olon, olat, azim, radi)
 
     for got, want in zip(actual, expected):
